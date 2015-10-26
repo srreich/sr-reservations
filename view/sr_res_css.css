@@ -1,0 +1,21 @@
+.sr_error{background-color:#F5A9A9;}
+
+.sr_success{background-color:#BCF5A9;}
+
+.nothing_scheduled{background-color:#F2F5A9;}
+
+.grayed{background-color:gray;}
+
+input[type="button"]
+{
+    background-image:-webkit-linear-gradient(top, #f9f9f9, #d1d1d1);
+    background-image:-moz-linear-gradient(top, #f9f9f9, #d1d1d1);
+    background-image:-ms-linear-gradient(top, #f9f9f9, #d1d1d1);
+    background-image:-o-linear-gradient(top, #f9f9f9, #d1d1d1);
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#f9f9f9, endColorstr=#d1d1d1);
+    margin: 3px;
+}
+
+#display_calendar_status{text-align:center;}
+
+select{padding-right:1em;}

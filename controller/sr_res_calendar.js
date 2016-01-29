@@ -95,8 +95,5 @@ jQuery(document).ready(
         });
 
     jQuery('#display_reservation_status').on("click","#cancel_button", function(){jQuery(this).val('Working');});
-    
-    var drop_margin = ( jQuery('.post-entry').width() - jQuery('#sr_room').width() ) / 2;
-    jQuery('#sr_room').css('margin-left', function(){return drop_margin;}).css('margin-right', function(){return drop_margin;}).css('margin-bottom','10px');
     }
 );

@@ -2,7 +2,7 @@
 /*
 Plugin Name: SR Room Reservations
 Description: Plugin for reserving a room for a period of time.
-Version: 1.0
+Version: 1.1
 Author: Stefan Reich
 License: GPL2
 
@@ -38,7 +38,7 @@ file in the "PTA Volunteer Sign Up Sheets" WordPress plugin developed by Stephen
         define('SR_ROOM_RESERVATION_VERSION_KEY', 'sr_room_reservation_version');
     
     if (!defined('SR_ROOM_RESERVATION_VERSION_NUM'))
-        define('SR_ROOM_RESERVATION_VERSION_NUM', '1.0');
+        define('SR_ROOM_RESERVATION_VERSION_NUM', '1.1');
     
     add_option(SR_ROOM_RESERVATION_VERSION_KEY, SR_ROOM_RESERVATION_VERSION_NUM);
     
@@ -56,19 +56,19 @@ file in the "PTA Volunteer Sign Up Sheets" WordPress plugin developed by Stephen
     // End Shortcodes
     
     register_activation_hook(__FILE__, 'sr_res_activate');
-    register_deactivation_hook( __FILE__, 'deactivate');
+    register_deactivation_hook( __FILE__, 'sr_deactivate');
     
-    add_action('plugins_loaded', 'init');
-    add_action('init', 'public_init' );
+    add_action('plugins_loaded', 'sr_init');
+    //add_action('init', 'sr_public_init' );
     
-    add_action('admin_init', 'admin_init'); 
-    add_action('admin_menu', 'admin_menu');
+    add_action('admin_init', 'sr_admin_init'); 
+    add_action('admin_menu', 'sr_admin_menu');
     
     /**
     * Admin Menu
     */
     
-    function admin_menu() {
+    function sr_admin_menu() {
         if ( current_user_can( 'manage_options' ) || current_user_can( 'manage_reservations' ) ) {
             if (!class_exists('SR_Res_Admin')) {
                 require_once(dirname(__FILE__).'/view/sr_res_admin.php');
@@ -78,19 +78,21 @@ file in the "PTA Volunteer Sign Up Sheets" WordPress plugin developed by Stephen
         }
     }
     
-    function admin_init(){
+    function sr_admin_init(){
         if(current_user_can('manage_options') || current_user_can('manage_reservations') ){
             require_once(dirname(__FILE__).'/model/sr_res_backend.php');
         }
     }
     
-    function public_init() {}
-    
-    // TODO
-    function init() {
+    //TODO
+    //function sr_public_init() {}
+        
+    function sr_init() {
         // Check our database version and run the activate function
-        $current = get_option( "sr_res_db_version" );
-        if ($current < $db_version) {
+        $current_version = get_option('sr_res_db_version');
+        global $db_version;
+        
+        if ( ($current_version < $db_version) OR ( empty($current_version) ) ) {
             sr_res_activate();
         }
     }
@@ -100,6 +102,7 @@ file in the "PTA Volunteer Sign Up Sheets" WordPress plugin developed by Stephen
     */
     function sr_res_activate() {
         global $wpdb;
+        global $db_version;
     
         if ( ! current_user_can( 'activate_plugins' ) )
             return;
@@ -114,7 +117,7 @@ file in the "PTA Volunteer Sign Up Sheets" WordPress plugin developed by Stephen
             branch_id INT NOT NULL,
             trash BOOL NOT NULL DEFAULT FALSE,
             PRIMARY KEY  (id)
-        ) $charset_collate;';
+        ) ' . $charset_collate . ';';
         $sql .= 'CREATE TABLE ' . $wpdb->prefix . 'sr_res_reservations(
             id INT NOT NULL AUTO_INCREMENT,
             room_id INT NOT NULL,
@@ -127,18 +130,18 @@ file in the "PTA Volunteer Sign Up Sheets" WordPress plugin developed by Stephen
             purpose VARCHAR(50) NOT NULL,
             trash BOOL NOT NULL DEFAULT FALSE,
             PRIMARY KEY  (id)
-        ) $charset_collate;';
+        ) ' . $charset_collate . ';';
         $sql .= 'CREATE TABLE ' . $wpdb->prefix . 'sr_res_branches(
             id INT NOT NULL AUTO_INCREMENT,
             branch VARCHAR(50) NOT NULL,
             trash BOOL NOT NULL DEFAULT FALSE,
             PRIMARY KEY  (id)
-        ) $charset_collate;';
+        ) ' . $charset_collate . ';';
         
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         dbDelta($sql);
 
-        update_option("sr_res_db_version", $db_version);
+        update_option('sr_res_db_version', $db_version);
         
         // Add custom role and capability
         $role = get_role( 'author' );
@@ -158,7 +161,7 @@ file in the "PTA Volunteer Sign Up Sheets" WordPress plugin developed by Stephen
     /**
     * Deactivate the plugin
     */
-    function deactivate() {
+    function sr_deactivate() {
         // Check permissions and referer
         if ( ! current_user_can( 'activate_plugins' ) )
             return;
